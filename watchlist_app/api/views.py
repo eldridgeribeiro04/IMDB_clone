@@ -1,11 +1,42 @@
 from rest_framework.response import Response
 # from rest_framework.decorators import api_view
-from watchlist_app.models import WatchList, StreamPlatform
-from watchlist_app.api.serializers import WatchListSerializer, StreamPlatformSerializer
+from watchlist_app.models import WatchList, StreamPlatform, Reviews
+from watchlist_app.api.serializers import WatchListSerializer, StreamPlatformSerializer, ReviewsSerializer
 from rest_framework import status
+from rest_framework import mixins, generics
 
 from rest_framework.views import APIView
 
+
+class ReviewDetail(mixins.RetrieveModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin,
+                   generics.GenericAPIView):
+    
+    queryset = Reviews.objects.all()
+    serializer_class = ReviewsSerializer
+    
+    def get(self, request, pk, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+    
+    def put(self, request, pk, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+    
+    def delete(self, request, pk, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+class ReviewtList(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
+    queryset = Reviews.objects.all()
+    serializer_class = ReviewsSerializer
+    
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+    
 
 class WatchListAV(APIView):
     
@@ -37,7 +68,7 @@ class WatchDetailAV(APIView):
     
     def put(self, request, pk):
         watchList = WatchList.objects.get(pk=pk)
-        serializer = WatchListSerializer(WatchList,data=request.data)
+        serializer = WatchListSerializer(watchList,data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -50,11 +81,13 @@ class WatchDetailAV(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     
+    
+    
 class StreamPlatformListAV(APIView):
     
     def get(self, request):
         stream_platforms = StreamPlatform.objects.all()
-        serializer = StreamPlatformSerializer(stream_platforms, many=True)
+        serializer = StreamPlatformSerializer(stream_platforms, many=True, context={'request': request})
         return Response(serializer.data)
     
     def post(self, request):
@@ -75,7 +108,7 @@ class StreamPlatformDetailAV(APIView):
         except StreamPlatform.DoesNotExist:
             return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = StreamPlatformSerializer(stream_platform)
+        serializer = StreamPlatformSerializer(stream_platform, context={'request': request})
         return Response(serializer.data)
     
     def put(self, request, pk):
