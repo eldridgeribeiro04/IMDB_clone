@@ -3,10 +3,12 @@ from watchlist_app.models import WatchList, StreamPlatform, Reviews
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)
     
     class Meta:
         model = Reviews
-        fields = "__all__"
+        # fields = "__all__"
+        exclude = ("watchlist",)
 
 
 class WatchListSerializer(serializers.ModelSerializer):
@@ -36,7 +38,14 @@ class WatchListSerializer(serializers.ModelSerializer):
     #         return value
         
 
-class StreamPlatformSerializer(serializers.HyperlinkedModelSerializer):
+# class StreamPlatformSerializer(serializers.HyperlinkedModelSerializer):
+#     watchlist = WatchListSerializer(many=True, read_only=True)
+    
+#     class Meta:
+#         model = StreamPlatform
+#         fields = "__all__"
+
+class StreamPlatformSerializer(serializers.ModelSerializer):
     watchlist = WatchListSerializer(many=True, read_only=True)
     
     class Meta:
