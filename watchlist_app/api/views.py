@@ -4,7 +4,7 @@ from watchlist_app.models import WatchList, StreamPlatform, Reviews
 from watchlist_app.api.serializers import WatchListSerializer, StreamPlatformSerializer, ReviewsSerializer
 from rest_framework import generics, status, viewsets
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions
+from rest_framework.permissions import IsAuthenticated
 from watchlist_app.api.permissions import AdminOrReadOnly, ReviewUserOrReadOnly
 
 from rest_framework import exceptions
@@ -26,12 +26,20 @@ class ReviewCreate(generics.CreateAPIView):
         if review_queryset.exists():
             raise exceptions.PermissionDenied("You have already reviewed this movie")
         
+        if movie.number_rating == 0:
+            movie.avg_rating = serializer.validated_data["rating"]
+        else:
+            movie.avg_rating = (movie.avg_rating + serializer.validated_data["rating"])/2
+            
+        movie.number_rating = movie.number_rating + 1
+        movie.save()
+        
         serializer.save(watchlist=movie, author=review_user)
 
 
 class ReviewList(generics.ListAPIView):
     serializer_class = ReviewsSerializer
-    permission_classes = [AdminOrReadOnly]
+    permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         pk = self.kwargs['pk']
