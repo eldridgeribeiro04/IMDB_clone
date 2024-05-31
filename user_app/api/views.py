@@ -8,7 +8,6 @@ from user_app import models
 # from rest_framework_simplejwt.tokens import RefreshToken
 
 
-
 @api_view(['POST',])
 def logout_view(request):
     
@@ -45,5 +44,5 @@ def create_user(request):
         else:
             data = serializer.errors
             
-        return Response(data) 
+        return Response(data, status=status.HTTP_201_CREATED) 
         

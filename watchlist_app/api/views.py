@@ -14,7 +14,7 @@ from watchlist_app.models import WatchList, StreamPlatform, Reviews
 from watchlist_app.api.serializers import WatchListSerializer, StreamPlatformSerializer, ReviewsSerializer
 from watchlist_app.api.permissions import IsAdminOrReadOnly, ReviewUserOrReadOnly
 from watchlist_app.api.throttling import ReviewCreateThrottle, ReviewListThrottle
-from watchlist_app.api.pagination import WatchListPagination, WatchListLOPagination
+from watchlist_app.api.pagination import WatchListPagination, WatchListLOPagination, WatchListCPagination
 
 from django.shortcuts import get_object_or_404
 
@@ -122,7 +122,7 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
 class WatchListGV(generics.ListAPIView):
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerializer
-    pagination_class = WatchListLOPagination
+    pagination_class = WatchListCPagination
         
     filter_backends = [filters.SearchFilter]
     filterset_fields = ['title', 'platform__name']
